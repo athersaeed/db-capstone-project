@@ -1,0 +1,3 @@
+#ignore all text files
+*.txt
+#the * means all files with .txt extension
