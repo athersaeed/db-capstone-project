@@ -54,4 +54,46 @@ DELETE FROM orders WHERE OrderID = order_id;
 SELECT CONCAT("ORDER: ", order_id, " is cancelled") AS Confirmation;
 END //
 DELIMITER ;
-CALL CancelOrder(5);
+CALL CancelOrder(1);
+
+
+
+-- Task7: Procedure with Control Flow
+DELIMITER //
+CREATE PROCEDURE CheckBooking(IN booking_date DATE, IN table_number INT)
+BEGIN
+DECLARE booking_status VARCHAR(50);
+IF EXISTS (SELECT 1 FROM bookings WHERE BookingDate = booking_date AND TableNumber = table_number) THEN
+	SET booking_status = CONCAT('Table ', table_number, ' is booked');
+ELSE
+	SET booking_status = CONCAT('Table ', table_number, ' is NOT booked');
+END IF;
+SELECT booking_status AS `BookingStatus`;
+END //
+DELIMITER ;
+CALL CheckBooking('2024-02-21', 1);
+
+
+
+-- Task8: Procedure with Transactions
+DELIMITER //
+CREATE PROCEDURE AddValidBooking(IN booking_id INT, IN booking_date DATE, IN table_number INT, IN customer_id INT)
+BEGIN
+DECLARE booking_status VARCHAR(50);
+START TRANSACTION;
+IF EXISTS (SELECT 1 FROM bookings WHERE BookingDate = booking_date AND TableNumber = table_number) THEN
+	SET booking_status = CONCAT('Table ', table_number, ' is booked. Transaction Cancelled');
+    ROLLBACK;
+ELSE
+	INSERT INTO bookings (BookingID, BookingDate, TableNumber, CustomerID) VALUES (booking_id, booking_date, table_number, customer_id);
+	SET booking_status = CONCAT('Table ', table_number, ' is NOW booked');
+    COMMIT;
+END IF;
+SELECT booking_status AS `BookingStatus`;
+END //
+DELIMITER ;
+CALL AddValidBooking(13, '2024-09-03', 19, 5);
+
+
+
+
